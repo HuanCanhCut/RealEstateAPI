@@ -1,6 +1,11 @@
 import { sequelize } from '../../config/database'
 import associations from './association'
+import Category from './CategoryModel'
+import Contract from './ContractModel'
+import Favorite from './FavoriteModel'
 import handleChildrenAfterFindHook from './hooks/childrenAfterFindHook'
+import PostDetail from './PostDetailModel'
+import Post from './PostModel'
 import RefreshToken from './RefreshTokenModel'
 import User from './UserModel'
 
@@ -17,4 +22,4 @@ sequelize
 sequelize.addHook('afterFind', handleChildrenAfterFindHook)
 
 // Export all models
-export { RefreshToken, User }
+export { Category, Contract, Favorite, Post, PostDetail, RefreshToken, User }

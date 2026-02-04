@@ -28,11 +28,11 @@ export const clearCookie = ({ res, cookies = [], path = '/', req }: IClearCookie
         res.cookie(cookie, '', {
             httpOnly: true,
             path,
-            sameSite: 'none',
+            sameSite: 'lax',
             secure: true,
             partitioned: true,
             maxAge: 0,
-            domain: process.env.NODE_ENV === 'production' && domain !== '.localhost' ? domain : undefined,
+            domain,
         })
     }
 }
@@ -53,10 +53,10 @@ export const setCookie = ({ res, cookies = [], path = '/', req }: ISetCookie) =>
         res.cookie(cookie.name, cookie.value, {
             httpOnly: true,
             path,
-            sameSite: 'none',
+            sameSite: 'lax',
             secure: true,
             partitioned: true,
-            domain: process.env.NODE_ENV === 'production' && domain !== '.localhost' ? domain : undefined,
+            domain,
         })
     }
 }

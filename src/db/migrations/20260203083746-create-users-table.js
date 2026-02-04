@@ -9,7 +9,6 @@ module.exports = {
          * Example:
          * await queryInterface.createTable('users', { id: Sequelize.INTEGER });
          */
-
         await queryInterface.createTable('users', {
             id: {
                 type: Sequelize.INTEGER,
@@ -27,14 +26,10 @@ module.exports = {
                 allowNull: false,
                 defaultValue: '',
             },
-            academic_degree: {
-                type: Sequelize.STRING,
-                allowNull: true,
-                defaultValue: null,
-            },
-            uuid: {
+            nickname: {
                 type: Sequelize.STRING,
                 allowNull: false,
+                unique: true,
             },
             email: {
                 type: Sequelize.STRING,
@@ -44,30 +39,20 @@ module.exports = {
                     isEmail: true,
                 },
             },
-            avatar: {
-                type: Sequelize.STRING,
-                allowNull: false,
-                defaultValue: '',
-            },
             password: {
                 type: Sequelize.TEXT,
                 allowNull: false,
                 defaultValue: '',
             },
             role: {
-                type: Sequelize.ENUM('teacher', 'student'),
+                type: Sequelize.ENUM('admin', 'customer', 'agent'),
                 allowNull: false,
-                defaultValue: 'student',
+                defaultValue: 'customer',
             },
-            is_active: {
-                type: Sequelize.BOOLEAN,
+            address: {
+                type: Sequelize.STRING,
                 allowNull: false,
-                defaultValue: true,
-            },
-            is_blocked: {
-                type: Sequelize.BOOLEAN,
-                allowNull: false,
-                defaultValue: false,
+                defaultValue: '',
             },
             created_at: {
                 type: Sequelize.DATE,
@@ -78,6 +63,16 @@ module.exports = {
                 type: Sequelize.DATE,
                 allowNull: false,
                 defaultValue: Sequelize.literal('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'),
+            },
+            is_active: {
+                type: Sequelize.BOOLEAN,
+                allowNull: false,
+                defaultValue: true,
+            },
+            is_blocked: {
+                type: Sequelize.BOOLEAN,
+                allowNull: false,
+                defaultValue: false,
             },
         })
     },

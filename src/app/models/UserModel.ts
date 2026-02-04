@@ -8,11 +8,10 @@ class User extends Model<InferAttributes<User>, InferCreationAttributes<User>> {
     declare last_name: string
     declare full_name?: string
     declare nickname: string
-    declare uuid: string
     declare email?: string
     declare password?: string
-    declare avatar: string
-    declare role: 'admin' | 'student'
+    declare role: 'admin' | 'customer' | 'agent'
+    declare address: string
     declare is_active: boolean
     declare is_blocked: boolean
     declare created_at?: Date
@@ -36,22 +35,10 @@ User.init(
             allowNull: false,
             defaultValue: '',
         },
-        full_name: {
-            type: DataTypes.VIRTUAL,
-            allowNull: true,
-            get() {
-                const full_name = `${this.first_name} ${this.last_name}`
-                return full_name.trim()
-            },
-        },
         nickname: {
             type: DataTypes.STRING,
             allowNull: false,
             unique: true,
-        },
-        uuid: {
-            type: DataTypes.STRING,
-            allowNull: false,
         },
         email: {
             type: DataTypes.STRING,
@@ -61,20 +48,20 @@ User.init(
                 isEmail: true,
             },
         },
-        avatar: {
-            type: DataTypes.STRING,
-            allowNull: false,
-            defaultValue: '',
-        },
         password: {
             type: DataTypes.TEXT,
             allowNull: false,
             defaultValue: '',
         },
         role: {
-            type: DataTypes.ENUM('teacher', 'student'),
+            type: DataTypes.ENUM('admin', 'customer', 'agent'),
             allowNull: false,
-            defaultValue: 'student',
+            defaultValue: 'customer',
+        },
+        address: {
+            type: DataTypes.STRING,
+            allowNull: false,
+            defaultValue: '',
         },
         is_active: {
             type: DataTypes.BOOLEAN,
