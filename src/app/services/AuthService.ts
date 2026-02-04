@@ -246,9 +246,9 @@ class AuthServices {
                     last_name: lastName,
                     full_name: name,
                     nickname,
-                    uuid: uuidv4(),
                     avatar: picture,
-                    role: 'student',
+                    role: 'customer',
+                    address: '',
                     is_active: true,
                     is_blocked: false,
                 })

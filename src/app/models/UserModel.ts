@@ -9,6 +9,7 @@ class User extends Model<InferAttributes<User>, InferCreationAttributes<User>> {
     declare full_name?: string
     declare nickname: string
     declare email?: string
+    declare avatar?: string
     declare password?: string
     declare role: 'admin' | 'customer' | 'agent'
     declare address: string
@@ -80,6 +81,9 @@ User.init(
         defaultScope: {
             attributes: {
                 exclude: ['password', 'email'],
+            },
+            where: {
+                is_blocked: false,
             },
         },
         scopes: {

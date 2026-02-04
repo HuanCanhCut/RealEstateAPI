@@ -60,9 +60,7 @@ class AuthController {
             const { user, auth_challenge_id } = await AuthService.register({ email, password })
 
             res.status(201).json({
-                data: {
-                    user,
-                },
+                data: user,
                 meta: {
                     auth_challenge_id,
                 },
