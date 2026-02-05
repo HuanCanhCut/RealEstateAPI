@@ -1,6 +1,8 @@
 import { NextFunction, Response } from 'express'
 
+import { responsePagination } from '../response/responsePagination'
 import UserService from '../services/UserService'
+import { PaginationRequest } from '../validators/api/commonSchema'
 import { GetUserByNicknameRequest, UpdateCurrentUserRequest } from '../validators/api/userSchema'
 
 class UserController {
@@ -36,6 +38,27 @@ class UserController {
             res.json({
                 data: user,
             })
+        } catch (error) {
+            return next(error)
+        }
+    }
+
+    getUsers = async (req: PaginationRequest, res: Response, next: NextFunction) => {
+        try {
+            const { page, per_page } = req.query
+
+            const { users, total } = await UserService.getUsers(Number(page), Number(per_page))
+
+            res.json(
+                responsePagination({
+                    req,
+                    data: users,
+                    total: total,
+                    count: users.length,
+                    current_page: Number(page),
+                    per_page: Number(per_page),
+                }),
+            )
         } catch (error) {
             return next(error)
         }
