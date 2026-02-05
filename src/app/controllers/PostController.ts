@@ -4,7 +4,7 @@ import jwt, { JwtPayload } from 'jsonwebtoken'
 import { responsePagination } from '../response/responsePagination'
 import PostService from '../services/PostService'
 import { PaginationRequest } from '../validators/api/commonSchema'
-import { CreatePostRequest } from '../validators/api/posts'
+import { CreatePostRequest, UpdatePostRequest } from '../validators/api/posts'
 
 class PostController {
     createPost = async (req: CreatePostRequest, res: Response, next: NextFunction) => {
@@ -68,6 +68,46 @@ class PostController {
                     per_page: Number(per_page),
                 }),
             )
+        } catch (error) {
+            return next(error)
+        }
+    }
+
+    updatePost = async (req: UpdatePostRequest, res: Response, next: NextFunction) => {
+        try {
+            const {
+                title,
+                description,
+                administrative_address,
+                sub_locality,
+                type,
+                images,
+                category_id,
+                role,
+                post_detail,
+            } = req.body
+
+            const { postId } = req.params
+
+            const decoded = req.decoded
+
+            const post = await PostService.updatePost({
+                postId: Number(postId),
+                title,
+                description,
+                administrative_address,
+                sub_locality,
+                type,
+                images,
+                category_id,
+                role,
+                post_detail,
+                userId: decoded?.sub,
+            })
+
+            res.json({
+                data: post,
+            })
         } catch (error) {
             return next(error)
         }

@@ -27,4 +27,15 @@ export const createPostSchema = z.object({
     }),
 })
 
+export const updatePostSchema = z.object({
+    body: createPostSchema.shape.body,
+    params: z.object({
+        postId: z.coerce.number().int().positive().transform(String),
+    }),
+})
+
 export type CreatePostRequest = TypedRequest<z.infer<typeof createPostSchema>['body']>
+export type UpdatePostRequest = TypedRequest<
+    z.infer<typeof updatePostSchema>['body'],
+    z.infer<typeof updatePostSchema>['params']
+>

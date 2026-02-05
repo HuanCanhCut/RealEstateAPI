@@ -11,7 +11,7 @@ const associations = () => {
     User.hasMany(Favorite, { foreignKey: 'user_id', as: 'favorites' })
     Favorite.belongsTo(User, { foreignKey: 'user_id', as: 'user' })
 
-    Post.hasOne(PostDetail, { foreignKey: 'post_id', as: 'post_detail' })
+    Post.hasOne(PostDetail, { foreignKey: 'post_id', as: 'detail' })
     PostDetail.belongsTo(Post, { foreignKey: 'post_id', as: 'post' })
 
     Post.hasOne(Contract, { foreignKey: 'post_id', as: 'contract' })

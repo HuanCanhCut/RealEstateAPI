@@ -1,4 +1,4 @@
-import { AppError, InternalServerError } from '../errors/errors'
+import { AppError, ForBiddenError, InternalServerError, NotFoundError } from '../errors/errors'
 import { Category, PostDetail, User } from '../models'
 import Post from '../models/PostModel'
 import { sequelize } from '~/config/database'
@@ -11,6 +11,8 @@ interface PostDetailInterface {
     legal_documents: string
     interior_status: string
     area: number
+    price: number
+    deposit: number
 }
 
 interface CreatePostParams {
@@ -79,7 +81,7 @@ class PostService {
                 include: [
                     {
                         model: PostDetail,
-                        as: 'post_detail',
+                        as: 'detail',
                     },
                     {
                         model: Category,
@@ -110,6 +112,84 @@ class PostService {
             })
 
             return { posts, total }
+        } catch (error: any) {
+            if (error instanceof AppError) {
+                throw error
+            }
+
+            throw new InternalServerError({ message: error.message + ' ' + error.stack })
+        }
+    }
+
+    updatePost = async ({
+        title,
+        description,
+        administrative_address,
+        sub_locality,
+        type,
+        images,
+        category_id,
+        role,
+        post_detail,
+        userId,
+        postId,
+    }: CreatePostParams & { postId: number }) => {
+        try {
+            // check if post exists
+            const post = await Post.findByPk(postId)
+
+            if (!post) {
+                throw new NotFoundError({ message: 'Post not found' })
+            }
+
+            // check if user is the owner of the post
+            if (post.user_id !== userId) {
+                throw new ForBiddenError({ message: 'You are not the owner of this post' })
+            }
+
+            // update post
+            await post.update({
+                title,
+                description,
+                administrative_address,
+                sub_locality,
+                type,
+                images: JSON.stringify(images),
+                category_id,
+                role,
+                user_id: userId,
+            })
+
+            // update post detail
+            await PostDetail.update(
+                {
+                    bedrooms: post_detail.bedrooms,
+                    bathrooms: post_detail.bathrooms,
+                    balcony: post_detail.balcony,
+                    main_door: post_detail.main_door,
+                    legal_documents: post_detail.legal_documents,
+                    interior_status: post_detail.interior_status,
+                    area: post_detail.area,
+                    price: Number(post_detail.price),
+                    deposit: Number(post_detail.deposit),
+                },
+                {
+                    where: {
+                        post_id: postId,
+                    },
+                },
+            )
+
+            const updatedPost = await Post.findByPk(postId, {
+                include: [
+                    {
+                        model: PostDetail,
+                        as: 'detail',
+                    },
+                ],
+            })
+
+            return updatedPost
         } catch (error: any) {
             if (error instanceof AppError) {
                 throw error
