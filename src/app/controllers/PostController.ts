@@ -151,6 +151,34 @@ class PostController {
             return next(error)
         }
     }
+
+    likePost = async (req: IdRequest, res: Response, next: NextFunction) => {
+        try {
+            const { id: postId } = req.params
+
+            const decoded = req.decoded
+
+            await PostService.toggleLikePost({ postId: Number(postId), userId: decoded?.sub, type: 'like' })
+
+            res.sendStatus(204)
+        } catch (error) {
+            return next(error)
+        }
+    }
+
+    unlikePost = async (req: IdRequest, res: Response, next: NextFunction) => {
+        try {
+            const { id: postId } = req.params
+
+            const decoded = req.decoded
+
+            await PostService.toggleLikePost({ postId: Number(postId), userId: decoded?.sub, type: 'unlike' })
+
+            res.sendStatus(204)
+        } catch (error) {
+            return next(error)
+        }
+    }
 }
 
 export default new PostController()

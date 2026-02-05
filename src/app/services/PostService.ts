@@ -1,5 +1,5 @@
-import { AppError, ForBiddenError, InternalServerError, NotFoundError } from '../errors/errors'
-import { Category, PostDetail, User } from '../models'
+import { AppError, BadRequestError, ForBiddenError, InternalServerError, NotFoundError } from '../errors/errors'
+import { Category, Favorite, PostDetail, User } from '../models'
 import Post from '../models/PostModel'
 import { sequelize } from '~/config/database'
 
@@ -281,6 +281,59 @@ class PostService {
             }
 
             return post
+        } catch (error: any) {
+            if (error instanceof AppError) {
+                throw error
+            }
+
+            throw new InternalServerError({ message: error.message + ' ' + error.stack })
+        }
+    }
+
+    toggleLikePost = async ({ postId, userId, type }: { postId: number; userId: number; type: 'like' | 'unlike' }) => {
+        try {
+            // check if post exists
+            const post = await Post.findByPk(postId)
+
+            if (!post) {
+                throw new NotFoundError({ message: 'Post not found' })
+            }
+
+            // check if user is the owner of the post
+            if (post.user_id === userId) {
+                throw new BadRequestError({ message: 'You cannot like or unlike your own post' })
+            }
+
+            const favorite = await Favorite.findOne({
+                where: {
+                    post_id: postId,
+                    user_id: userId,
+                },
+            })
+
+            if (type === 'like') {
+                if (favorite) {
+                    throw new BadRequestError({ message: 'You have already liked this post' })
+                }
+
+                await Favorite.create({
+                    post_id: postId,
+                    user_id: userId,
+                })
+            } else {
+                if (!favorite) {
+                    throw new BadRequestError({ message: 'You have not liked this post' })
+                }
+
+                await Favorite.destroy({
+                    where: {
+                        post_id: postId,
+                        user_id: userId,
+                    },
+                })
+            }
+
+            return true
         } catch (error: any) {
             if (error instanceof AppError) {
                 throw error

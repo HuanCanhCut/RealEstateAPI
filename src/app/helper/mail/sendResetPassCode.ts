@@ -18,32 +18,6 @@ const sendResetPassCode = ({ email, code }: { email: string; code: number }) => 
         to: email,
         subject: 'Reset Password Code',
         html: `
-            <html>
-                <body style="font-family: Arial, sans-serif; color: #333">
-                    <div style="max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 5px">
-                        <div style="width: 100%; display: flex; justify-content: center; align-items: center">
-                            <img
-                                src="https://res.cloudinary.com/dkmwrkngj/image/upload/v1759854156/dark-logo_e176mo.png"  
-                                style="width: 30%; height: auto; object-fit: cover; margin: 0 auto"
-                                alt=""
-                            />
-                        </div>
-
-                        <h1>Mã xác minh</h1>
-
-                        <h4 style="font-weight: 400">
-                            Vui lòng điền mã xác minh sau để cập nhật lại mật khẩu, vui lòng không chia sẻ mã này cho bất kì ai. Mã có hiệu lực trong vòng ${formatDuration(Number(process.env.RESET_PASSWORD_TTL))}.
-                        </h4>
-
-                        <h1 style="text-align: center">${code}</h1>
-
-                        <p>Email này được gửi từ hệ thống, vui lòng không trả lời lại.</p>
-
-                        <h3 style="color: rgb(0, 76, 255); text-align: center">🐧 Huấn Cánh Cụt 🐧</h3>
-                    </div>
-                </body>
-            </html>
-
             <!DOCTYPE html>
             <html>
                 <head>
@@ -70,9 +44,9 @@ const sendResetPassCode = ({ email, code }: { email: string; code: number }) => 
                                 <div style="padding: 40px 30px; text-align: center;">
                                     <h1 style="margin: 0 0 20px; font-size: 24px; font-weight: 700; color: #1a1a1a;">Mã xác minh</h1>
                                     
-                                    <p style="margin: 0 0 30px; line-height: 1.6; color: #555; font-size: 16px;">
-                                        Chào mừng bạn đến với phần mềm quản lí sinh viên" style="color: #ff2056; text-decoration: none;"><strong>Thư viện số</strong></a>. Vui lòng sử dụng mã xác minh dưới đây để cập nhật lại mật khẩu.
-                                        <br>Mã này sẽ hết hạn trong <strong>${formatDuration(Number(process.env.VERIFY_AUTH_TTL))}</strong>.
+                                     <p style="margin: 0 0 30px; line-height: 1.6; color: #555; font-size: 16px;">
+                                        Chào mừng bạn đến với phần mềm quản lí dự án bất động sản <strong style="color: #ff2056; text-decoration: none;">Real Estate API</strong>. Vui lòng sử dụng mã xác minh dưới đây để cập nhật lại mật khẩu.
+                                        <br>Mã này sẽ hết hạn trong <strong style="color: #ff2056; text-decoration: none;">${formatDuration(Number(process.env.RESET_PASSWORD_TTL))}</strong>.
                                     </p>
 
                                     <!-- Code Box -->

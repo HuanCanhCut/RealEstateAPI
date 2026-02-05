@@ -45,8 +45,8 @@ const sendResetPassCode = ({ email, code }: { email: string; code: number }) => 
                                     <h1 style="margin: 0 0 20px; font-size: 24px; font-weight: 700; color: #1a1a1a;">Xác minh tài khoản</h1>
                                     
                                     <p style="margin: 0 0 30px; line-height: 1.6; color: #555; font-size: 16px;">
-                                        Chào mừng bạn đến với phần mềm quản lí sinh viên" style="color: #ff2056; text-decoration: none;"><strong>Thư viện số</strong></a>. Vui lòng sử dụng mã xác minh dưới đây để hoàn tất đăng ký.
-                                        <br>Mã này sẽ hết hạn trong <strong>${formatDuration(Number(process.env.VERIFY_AUTH_TTL))}</strong>.
+                                        Chào mừng bạn đến với phần mềm quản lí dự án bất động sản <strong style="color: #ff2056; text-decoration: none;">Real Estate API</strong>. Vui lòng sử dụng mã xác minh dưới đây để hoàn tất đăng ký.
+                                        <br>Mã này sẽ hết hạn trong <strong style="color: #ff2056; text-decoration: none;">${formatDuration(Number(process.env.VERIFY_AUTH_TTL))}</strong>.
                                     </p>
 
                                     <!-- Code Box -->
