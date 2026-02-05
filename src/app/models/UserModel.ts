@@ -13,6 +13,7 @@ class User extends Model<InferAttributes<User>, InferCreationAttributes<User>> {
     declare password?: string
     declare role: 'admin' | 'customer' | 'agent'
     declare address: string
+    declare phone_number?: string
     declare is_active: boolean
     declare is_blocked: boolean
     declare created_at?: Date
@@ -67,6 +68,10 @@ User.init(
             type: DataTypes.STRING,
             allowNull: false,
             defaultValue: '',
+        },
+        phone_number: {
+            type: DataTypes.STRING,
+            allowNull: true,
         },
         is_active: {
             type: DataTypes.BOOLEAN,
