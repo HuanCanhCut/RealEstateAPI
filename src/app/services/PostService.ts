@@ -41,37 +41,63 @@ class PostService {
         post_detail,
         userId,
     }: CreatePostParams) => {
-        const post = await Post.create({
-            title,
-            description,
-            administrative_address: administrative_address,
-            sub_locality: sub_locality,
-            type,
-            images: JSON.stringify(images),
-            approval_status: 'pending',
-            handover_status: 'not_delivered',
-            category_id: category_id,
-            role,
-            user_id: userId,
-        })
+        const t = await sequelize.transaction()
 
-        if (post) {
-            await PostDetail.create({
-                post_id: post.id as number,
-                ...post_detail,
-            })
-        }
+        try {
+            const hasCategory = await Category.findByPk(category_id)
 
-        const postData = Post.findByPk(post.id, {
-            include: [
+            if (!hasCategory) {
+                throw new NotFoundError({ message: 'Category not found' })
+            }
+
+            const post = await Post.create(
                 {
-                    model: PostDetail,
-                    as: 'post_detail',
+                    title,
+                    description,
+                    administrative_address: administrative_address,
+                    sub_locality: sub_locality,
+                    type,
+                    images: JSON.stringify(images),
+                    approval_status: 'pending',
+                    handover_status: 'not_delivered',
+                    category_id: category_id,
+                    role,
+                    user_id: userId,
                 },
-            ],
-        })
+                { transaction: t },
+            )
 
-        return postData
+            if (post) {
+                await PostDetail.create(
+                    {
+                        post_id: post.id as number,
+                        ...post_detail,
+                    },
+                    { transaction: t },
+                )
+            }
+
+            await t.commit()
+
+            const postData = await Post.findByPk(post.id, {
+                include: [
+                    {
+                        model: PostDetail,
+                        as: 'detail',
+                    },
+                ],
+            })
+
+            return postData
+        } catch (error: any) {
+            await t.rollback()
+
+            if (error instanceof AppError) {
+                throw error
+            }
+
+            throw new InternalServerError({ message: error.message + ' ' + error.stack })
+        }
     }
 
     getPosts = async (page: number, per_page: number, userId: number | null) => {
@@ -190,6 +216,71 @@ class PostService {
             })
 
             return updatedPost
+        } catch (error: any) {
+            if (error instanceof AppError) {
+                throw error
+            }
+
+            throw new InternalServerError({ message: error.message + ' ' + error.stack })
+        }
+    }
+
+    deletePost = async ({ postId, userId }: { postId: number; userId: number }) => {
+        try {
+            // check if post exists
+            const post = await Post.findByPk(postId)
+
+            if (!post) {
+                throw new NotFoundError({ message: 'Post not found' })
+            }
+
+            // check if user is the owner of the post
+            if (post.user_id !== userId) {
+                throw new ForBiddenError({ message: 'You are not the owner of this post' })
+            }
+
+            // delete post
+            await post.destroy()
+        } catch (error: any) {
+            if (error instanceof AppError) {
+                throw error
+            }
+
+            throw new InternalServerError({ message: error.message + ' ' + error.stack })
+        }
+    }
+
+    getPostById = async ({ postId, userId }: { postId: number; userId: number | null }) => {
+        try {
+            const post = await Post.findByPk(postId, {
+                include: [
+                    {
+                        model: PostDetail,
+                        as: 'detail',
+                    },
+                ],
+                attributes: {
+                    include: [
+                        [
+                            sequelize.literal(`
+                                EXISTS (
+                                    SELECT 1
+                                    FROM favorites
+                                    WHERE favorites.user_id = ${sequelize.escape(userId || 0)}
+                                      AND favorites.post_id = Post.id
+                                )
+                            `),
+                            'is_liked',
+                        ],
+                    ],
+                },
+            })
+
+            if (!post) {
+                throw new NotFoundError({ message: 'Post not found' })
+            }
+
+            return post
         } catch (error: any) {
             if (error instanceof AppError) {
                 throw error

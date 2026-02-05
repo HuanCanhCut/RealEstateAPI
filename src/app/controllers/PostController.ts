@@ -3,7 +3,7 @@ import jwt, { JwtPayload } from 'jsonwebtoken'
 
 import { responsePagination } from '../response/responsePagination'
 import PostService from '../services/PostService'
-import { PaginationRequest } from '../validators/api/commonSchema'
+import { IdRequest, PaginationRequest } from '../validators/api/commonSchema'
 import { CreatePostRequest, UpdatePostRequest } from '../validators/api/posts'
 
 class PostController {
@@ -36,7 +36,7 @@ class PostController {
                 userId: decoded?.sub,
             })
 
-            res.json({
+            res.status(201).json({
                 data: post,
             })
         } catch (error) {
@@ -104,6 +104,45 @@ class PostController {
                 post_detail,
                 userId: decoded?.sub,
             })
+
+            res.json({
+                data: post,
+            })
+        } catch (error) {
+            return next(error)
+        }
+    }
+
+    deletePost = async (req: IdRequest, res: Response, next: NextFunction) => {
+        try {
+            const { id: postId } = req.params
+
+            const decoded = req.decoded
+
+            await PostService.deletePost({
+                postId: Number(postId),
+                userId: decoded?.sub,
+            })
+
+            res.sendStatus(204)
+        } catch (error) {
+            return next(error)
+        }
+    }
+
+    getPostById = async (req: IdRequest, res: Response, next: NextFunction) => {
+        try {
+            const { id: postId } = req.params
+
+            const { access_token } = req.cookies
+
+            let decoded: (JwtPayload & { sub: number }) | null = null
+
+            if (access_token) {
+                decoded = jwt.verify(access_token, process.env.JWT_SECRET as string) as JwtPayload & { sub: number }
+            }
+
+            const post = await PostService.getPostById({ postId: Number(postId), userId: decoded?.sub ?? null })
 
             res.json({
                 data: post,

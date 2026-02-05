@@ -22,6 +22,8 @@ module.exports = {
                     model: 'users',
                     key: 'id',
                 },
+                onDelete: 'CASCADE',
+                onUpdate: 'CASCADE',
             },
             customer_citizen_id: {
                 type: Sequelize.STRING(12),
@@ -38,6 +40,8 @@ module.exports = {
                     model: 'posts',
                     key: 'id',
                 },
+                onDelete: 'CASCADE',
+                onUpdate: 'CASCADE',
             },
             amount: {
                 type: Sequelize.DECIMAL(14, 2),

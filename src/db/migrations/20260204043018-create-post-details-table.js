@@ -22,6 +22,8 @@ module.exports = {
                     model: 'posts',
                     key: 'id',
                 },
+                onDelete: 'CASCADE',
+                onUpdate: 'CASCADE',
             },
             bedrooms: {
                 type: Sequelize.INTEGER,
