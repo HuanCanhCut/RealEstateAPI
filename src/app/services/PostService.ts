@@ -1,5 +1,7 @@
-import { PostDetail } from '../models'
+import { AppError, InternalServerError } from '../errors/errors'
+import { Category, PostDetail, User } from '../models'
 import Post from '../models/PostModel'
+import { sequelize } from '~/config/database'
 
 interface PostDetailInterface {
     bedrooms: number
@@ -68,6 +70,53 @@ class PostService {
         })
 
         return postData
+    }
+
+    getPosts = async (page: number, per_page: number, userId: number | null) => {
+        try {
+            const { rows: posts, count: total } = await Post.findAndCountAll({
+                distinct: true,
+                include: [
+                    {
+                        model: PostDetail,
+                        as: 'post_detail',
+                    },
+                    {
+                        model: Category,
+                        as: 'category',
+                    },
+                    {
+                        model: User,
+                        as: 'user',
+                    },
+                ],
+                attributes: {
+                    include: [
+                        [
+                            sequelize.literal(`
+                                EXISTS (
+                                    SELECT 1
+                                    FROM favorites
+                                    WHERE favorites.user_id = ${sequelize.escape(userId || 0)}
+                                      AND favorites.post_id = Post.id
+                                )
+                            `),
+                            'is_liked',
+                        ],
+                    ],
+                },
+                limit: per_page,
+                offset: (page - 1) * per_page,
+            })
+
+            return { posts, total }
+        } catch (error: any) {
+            if (error instanceof AppError) {
+                throw error
+            }
+
+            throw new InternalServerError({ message: error.message + ' ' + error.stack })
+        }
     }
 }
 
