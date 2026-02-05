@@ -1,5 +1,6 @@
 import { z } from 'zod'
 
+import { paginationSchema } from './commonSchema'
 import { TypedRequest } from '~/types/request'
 
 export const createPostSchema = z.object({
@@ -34,8 +35,24 @@ export const updatePostSchema = z.object({
     }),
 })
 
+export const getPostsSchema = z.object({
+    query: paginationSchema.shape.query.extend({
+        category_id: z.coerce.number().int().positive().transform(String).optional(),
+        type: z.enum(['sell', 'rent']).optional(),
+        location: z.string().optional(),
+    }),
+})
+
+export const searchPostsSchema = z.object({
+    query: z.object({
+        q: z.string(),
+    }),
+})
+
 export type CreatePostRequest = TypedRequest<z.infer<typeof createPostSchema>['body']>
 export type UpdatePostRequest = TypedRequest<
     z.infer<typeof updatePostSchema>['body'],
     z.infer<typeof updatePostSchema>['params']
 >
+export type GetPostsRequest = TypedRequest<any, any, z.infer<typeof getPostsSchema>['query']>
+export type SearchPostsRequest = TypedRequest<any, any, z.infer<typeof searchPostsSchema>['query']>

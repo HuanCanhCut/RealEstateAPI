@@ -3,8 +3,8 @@ import jwt, { JwtPayload } from 'jsonwebtoken'
 
 import { responsePagination } from '../response/responsePagination'
 import PostService from '../services/PostService'
-import { IdRequest, PaginationRequest } from '../validators/api/commonSchema'
-import { CreatePostRequest, UpdatePostRequest } from '../validators/api/posts'
+import { IdRequest } from '../validators/api/commonSchema'
+import { CreatePostRequest, GetPostsRequest, SearchPostsRequest, UpdatePostRequest } from '../validators/api/posts'
 
 class PostController {
     createPost = async (req: CreatePostRequest, res: Response, next: NextFunction) => {
@@ -44,9 +44,9 @@ class PostController {
         }
     }
 
-    getPosts = async (req: PaginationRequest, res: Response, next: NextFunction) => {
+    getPosts = async (req: GetPostsRequest, res: Response, next: NextFunction) => {
         try {
-            const { page, per_page } = req.query
+            const { page, per_page, type, category_id, location } = req.query
 
             const { access_token } = req.cookies
 
@@ -56,7 +56,14 @@ class PostController {
                 decoded = jwt.verify(access_token, process.env.JWT_SECRET as string) as JwtPayload & { sub: number }
             }
 
-            const { posts, total } = await PostService.getPosts(Number(page), Number(per_page), decoded?.sub ?? null)
+            const { posts, total } = await PostService.getPosts({
+                page: Number(page),
+                per_page: Number(per_page),
+                type,
+                category_id: category_id ? Number(category_id) : undefined,
+                location,
+                userId: decoded?.sub ?? null,
+            })
 
             res.json(
                 responsePagination({
@@ -175,6 +182,20 @@ class PostController {
             await PostService.toggleLikePost({ postId: Number(postId), userId: decoded?.sub, type: 'unlike' })
 
             res.sendStatus(204)
+        } catch (error) {
+            return next(error)
+        }
+    }
+
+    searchPosts = async (req: SearchPostsRequest, res: Response, next: NextFunction) => {
+        try {
+            const { q } = req.query
+
+            const posts = await PostService.searchPosts({ keyword: q })
+
+            res.json({
+                data: posts,
+            })
         } catch (error) {
             return next(error)
         }

@@ -1,3 +1,5 @@
+import { Op } from 'sequelize'
+
 import { AppError, BadRequestError, ForBiddenError, InternalServerError, NotFoundError } from '../errors/errors'
 import { Category, Favorite, PostDetail, User } from '../models'
 import Post from '../models/PostModel'
@@ -100,8 +102,38 @@ class PostService {
         }
     }
 
-    getPosts = async (page: number, per_page: number, userId: number | null) => {
+    getPosts = async ({
+        page,
+        per_page,
+        type,
+        category_id,
+        location,
+        userId,
+    }: {
+        page: number
+        per_page: number
+        type?: 'sell' | 'rent'
+        category_id?: number
+        location?: string
+        userId: number | null
+    }) => {
         try {
+            const whereClause: any = {}
+
+            if (type) {
+                whereClause.type = type
+            }
+
+            if (category_id) {
+                whereClause.category_id = category_id
+            }
+
+            if (location) {
+                whereClause.administrative_address = {
+                    [Op.like]: `${location}%`,
+                }
+            }
+
             const { rows: posts, count: total } = await Post.findAndCountAll({
                 distinct: true,
                 include: [
@@ -133,8 +165,10 @@ class PostService {
                         ],
                     ],
                 },
+                where: whereClause,
                 limit: per_page,
                 offset: (page - 1) * per_page,
+                order: [['id', 'DESC']],
             })
 
             return { posts, total }
@@ -334,6 +368,49 @@ class PostService {
             }
 
             return true
+        } catch (error: any) {
+            if (error instanceof AppError) {
+                throw error
+            }
+
+            throw new InternalServerError({ message: error.message + ' ' + error.stack })
+        }
+    }
+
+    searchPosts = async ({ keyword }: { keyword: string }) => {
+        try {
+            const posts = await Post.findAll({
+                where: {
+                    [Op.or]: [
+                        {
+                            title: {
+                                [Op.like]: `${keyword}%`,
+                            },
+                        },
+                        {
+                            administrative_address: {
+                                [Op.like]: `${keyword}%`,
+                            },
+                        },
+                        {
+                            sub_locality: {
+                                [Op.like]: `${keyword}%`,
+                            },
+                        },
+                    ],
+                },
+                include: [
+                    {
+                        model: PostDetail,
+                        as: 'detail',
+                    },
+                ],
+                logging: console.log,
+                limit: 10,
+                order: [['id', 'DESC']],
+            })
+
+            return posts
         } catch (error: any) {
             if (error instanceof AppError) {
                 throw error
