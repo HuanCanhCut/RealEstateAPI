@@ -41,6 +41,10 @@ User.init(
             allowNull: false,
             unique: true,
         },
+        avatar: {
+            type: DataTypes.STRING,
+            allowNull: true,
+        },
         email: {
             type: DataTypes.STRING,
             allowNull: false,
