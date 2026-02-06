@@ -54,10 +54,10 @@ class AuthController {
 
     // [POST] /auth/register
     register = async (req: RegisterRequest, res: Response, next: NextFunction) => {
-        const { email, password } = req.body
+        const { fullname, email, password } = req.body
 
         try {
-            const { user, auth_challenge_id } = await AuthService.register({ email, password })
+            const { user, auth_challenge_id } = await AuthService.register({ fullname, email, password })
 
             res.status(201).json({
                 data: user,

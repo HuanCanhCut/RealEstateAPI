@@ -67,7 +67,7 @@ class AuthServices {
         }
     }
 
-    register = async ({ email, password }: { email: string; password: string }) => {
+    register = async ({ fullname, email, password }: { fullname: string; email: string; password: string }) => {
         try {
             const passwordHashed = await hashValue(password)
 
@@ -85,8 +85,8 @@ class AuthServices {
                     email,
                     uuid: uuidv4(),
                     password: passwordHashed,
-                    first_name: '',
-                    last_name: emailName,
+                    first_name: fullname.split(' ')[0],
+                    last_name: fullname.split(' ').slice(1).join(' '),
                     avatar: '',
                     is_active: false,
                     nickname,

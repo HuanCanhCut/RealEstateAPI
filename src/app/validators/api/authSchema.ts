@@ -7,12 +7,21 @@ const passwordSchema = z.string().min(6)
 
 export const registerSchema = z.object({
     body: z.object({
+        fullname: z
+            .string()
+            .min(1, 'Tên không được bỏ trống')
+            .refine((value) => value.split(' ').length >= 2, 'Tên phải có ít nhất 2 từ'),
         email: emailSchema,
         password: passwordSchema,
     }),
 })
 
-export const loginSchema = registerSchema.extend({})
+export const loginSchema = z.object({
+    body: z.object({
+        email: emailSchema,
+        password: passwordSchema,
+    }),
+})
 
 export const loginWithTokenSchema = z.object({
     body: z.object({
