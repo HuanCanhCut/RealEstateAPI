@@ -13,7 +13,10 @@ import {
     verifyAccountSchema,
     verifyAuthChallengeIdSchema,
 } from '../app/validators/api/authSchema'
+import MeController from '~/app/controllers/MeController'
+import verifyToken from '~/app/middlewares/verifyToken'
 
+router.get('/me', verifyToken, MeController.getCurrentUser)
 router.post('/register', validate(registerSchema), AuthController.register)
 router.post('/login', validate(loginSchema), AuthController.login)
 router.post('/logout', AuthController.logout)

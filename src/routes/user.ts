@@ -1,6 +1,5 @@
 import express from 'express'
 
-import MeController from '~/app/controllers/MeController'
 import UserController from '~/app/controllers/UserController'
 import { validate } from '~/app/middlewares/validate'
 import verifyAdmin from '~/app/middlewares/verifyAdmin'
@@ -10,7 +9,6 @@ import { getUserByNicknameSchema, updateCurrentUserSchema } from '~/app/validato
 
 const router = express.Router()
 
-router.get('/me', verifyToken, MeController.getCurrentUser)
 router.get('/', validate(paginationSchema), verifyToken, UserController.getUsers)
 router.get('/:nickname', validate(getUserByNicknameSchema), verifyToken, UserController.getUserByNickname)
 router.patch('/me', validate(updateCurrentUserSchema), verifyToken, verifyAdmin, UserController.updateCurrentUser)
