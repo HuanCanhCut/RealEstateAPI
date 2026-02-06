@@ -2,6 +2,7 @@ import express from 'express'
 
 import PostController from '~/app/controllers/PostController'
 import { validate } from '~/app/middlewares/validate'
+import verifyAdmin from '~/app/middlewares/verifyAdmin'
 import verifyToken from '~/app/middlewares/verifyToken'
 import { idSchema } from '~/app/validators/api/commonSchema'
 import { createPostSchema, getPostsSchema, searchPostsSchema, updatePostSchema } from '~/app/validators/api/posts'
@@ -16,5 +17,8 @@ router.put('/:postId', validate(updatePostSchema), verifyToken, PostController.u
 router.delete('/:id', validate(idSchema), verifyToken, PostController.deletePost)
 router.post('/:id/like', validate(idSchema), verifyToken, PostController.likePost)
 router.post('/:id/unlike', validate(idSchema), verifyToken, PostController.unlikePost)
+router.patch('/:id/approve', validate(idSchema), verifyToken, verifyAdmin, PostController.approvePost)
+router.patch('/:id/reject', validate(idSchema), verifyToken, verifyAdmin, PostController.rejectPost)
+router.patch('/:id/pending', validate(idSchema), verifyToken, verifyAdmin, PostController.pendingPost)
 
 export default router

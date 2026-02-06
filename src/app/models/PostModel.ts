@@ -79,6 +79,11 @@ Post.init(
     {
         tableName: 'posts',
         sequelize,
+        defaultScope: {
+            where: {
+                approval_status: 'approved',
+            },
+        },
     },
 )
 

@@ -46,7 +46,7 @@ class PostController {
 
     getPosts = async (req: GetPostsRequest, res: Response, next: NextFunction) => {
         try {
-            const { page, per_page, type, category_id, location } = req.query
+            const { page, per_page, type, category_id, location, approval_status } = req.query
 
             const { access_token } = req.cookies
 
@@ -63,6 +63,7 @@ class PostController {
                 category_id: category_id ? Number(category_id) : undefined,
                 location,
                 userId: decoded?.sub ?? null,
+                approval_status,
             })
 
             res.json(
@@ -195,6 +196,66 @@ class PostController {
 
             res.json({
                 data: posts,
+            })
+        } catch (error) {
+            return next(error)
+        }
+    }
+
+    approvePost = async (req: IdRequest, res: Response, next: NextFunction) => {
+        try {
+            const { id: postId } = req.params
+
+            const decoded = req.decoded
+
+            const post = await PostService.modifyPostApprovalStatus({
+                postId: Number(postId),
+                userId: decoded?.sub,
+                type: 'approved',
+            })
+
+            res.json({
+                data: post,
+            })
+        } catch (error) {
+            return next(error)
+        }
+    }
+
+    rejectPost = async (req: IdRequest, res: Response, next: NextFunction) => {
+        try {
+            const { id: postId } = req.params
+
+            const decoded = req.decoded
+
+            const post = await PostService.modifyPostApprovalStatus({
+                postId: Number(postId),
+                userId: decoded?.sub,
+                type: 'rejected',
+            })
+
+            res.json({
+                data: post,
+            })
+        } catch (error) {
+            return next(error)
+        }
+    }
+
+    pendingPost = async (req: IdRequest, res: Response, next: NextFunction) => {
+        try {
+            const { id: postId } = req.params
+
+            const decoded = req.decoded
+
+            const post = await PostService.modifyPostApprovalStatus({
+                postId: Number(postId),
+                userId: decoded?.sub,
+                type: 'pending',
+            })
+
+            res.json({
+                data: post,
             })
         } catch (error) {
             return next(error)

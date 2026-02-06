@@ -109,6 +109,7 @@ class PostService {
         category_id,
         location,
         userId,
+        approval_status,
     }: {
         page: number
         per_page: number
@@ -116,6 +117,7 @@ class PostService {
         category_id?: number
         location?: string
         userId: number | null
+        approval_status?: 'approved' | 'pending' | 'rejected' | 'all'
     }) => {
         try {
             const whereClause: any = {}
@@ -134,7 +136,19 @@ class PostService {
                 }
             }
 
-            const { rows: posts, count: total } = await Post.findAndCountAll({
+            const currentUser = await User.findByPk(userId ?? 0)
+
+            let PostScope = Post
+
+            if (currentUser?.role === 'admin' && approval_status) {
+                PostScope = Post.unscoped()
+
+                if (approval_status !== 'all') {
+                    whereClause.approval_status = approval_status
+                }
+            }
+
+            const { rows: posts, count: total } = await PostScope.findAndCountAll({
                 distinct: true,
                 include: [
                     {
@@ -262,15 +276,15 @@ class PostService {
     deletePost = async ({ postId, userId }: { postId: number; userId: number }) => {
         try {
             // check if post exists
-            const post = await Post.findByPk(postId)
+            const [post, user] = await Promise.all([Post.findByPk(postId), User.findByPk(userId)])
 
             if (!post) {
                 throw new NotFoundError({ message: 'Post not found' })
             }
 
             // check if user is the owner of the post
-            if (post.user_id !== userId) {
-                throw new ForBiddenError({ message: 'You are not the owner of this post' })
+            if (post.user_id !== userId || user?.role !== 'admin') {
+                throw new ForBiddenError({ message: 'You are not authorized to delete this post' })
             }
 
             // delete post
@@ -291,6 +305,10 @@ class PostService {
                     {
                         model: PostDetail,
                         as: 'detail',
+                    },
+                    {
+                        model: User,
+                        as: 'user',
                     },
                 ],
                 attributes: {
@@ -411,6 +429,53 @@ class PostService {
             })
 
             return posts
+        } catch (error: any) {
+            if (error instanceof AppError) {
+                throw error
+            }
+
+            throw new InternalServerError({ message: error.message + ' ' + error.stack })
+        }
+    }
+
+    modifyPostApprovalStatus = async ({
+        postId,
+        userId,
+        type,
+    }: {
+        postId: number
+        userId: number
+        type: 'approved' | 'rejected' | 'pending'
+    }) => {
+        try {
+            const [post, user] = await Promise.all([Post.findByPk(postId), User.findByPk(userId)])
+
+            if (!post) {
+                throw new NotFoundError({ message: 'Post not found' })
+            }
+
+            if (user?.role !== 'admin') {
+                throw new ForBiddenError({
+                    message: 'You are not authorized to toggle the approval status of this post',
+                })
+            }
+
+            if (post.approval_status === type) {
+                throw new BadRequestError({ message: 'Post already has this approval status' })
+            }
+
+            await Post.update(
+                {
+                    approval_status: type,
+                },
+                {
+                    where: {
+                        id: postId,
+                    },
+                },
+            )
+
+            return post
         } catch (error: any) {
             if (error instanceof AppError) {
                 throw error

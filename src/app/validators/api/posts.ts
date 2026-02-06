@@ -40,6 +40,7 @@ export const getPostsSchema = z.object({
         category_id: z.coerce.number().int().positive().transform(String).optional(),
         type: z.enum(['sell', 'rent']).optional(),
         location: z.string().optional(),
+        approval_status: z.enum(['approved', 'pending', 'rejected', 'all']).optional(),
     }),
 })
 
