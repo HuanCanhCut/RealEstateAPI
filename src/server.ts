@@ -17,7 +17,7 @@ import route from './routes/index'
 const app = express()
 const server = http.createServer(app)
 
-const allowedOrigins: string[] = ['https://library.local', 'https://library.huanpenguin.click', 'http://localhost:3000']
+const allowedOrigins: string[] = ['http://localhost:5173']
 
 const corsOptions: cors.CorsOptions = {
     origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
