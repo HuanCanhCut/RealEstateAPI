@@ -8,11 +8,19 @@ import { InternalServerError, UnprocessableEntityError } from '../errors/errors'
 export const validate = (schema: z.ZodSchema) => {
     return async (req: Request, res: Response, next: NextFunction) => {
         try {
-            await schema.parseAsync({
+            const parsed = (await schema.parseAsync({
                 body: req.body,
                 query: req.query,
                 params: req.params,
-            })
+            })) as {
+                body: any
+                query: any
+                params: any
+            }
+
+            req.body = parsed.body
+            req.query = parsed.query
+            req.params = parsed.params
 
             next()
         } catch (error) {
