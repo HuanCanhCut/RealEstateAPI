@@ -1,6 +1,7 @@
 import { Express, Request, Response } from 'express'
 
 import authRoute from './auth'
+import categoryRoute from './category'
 import postRoute from './post'
 import userRoute from './user'
 import errorHandler from '~/app/errors/errorHandler'
@@ -10,6 +11,7 @@ const route = (app: Express) => {
     app.use('/api/auth', authRoute)
     app.use('/api/posts', postRoute)
     app.use('/api/users', userRoute)
+    app.use('/api/categories', categoryRoute)
 
     app.all('*', (req: Request, res: Response) => {
         res.status(404).json({

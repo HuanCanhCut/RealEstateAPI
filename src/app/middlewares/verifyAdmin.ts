@@ -10,8 +10,6 @@ const verifyAdmin = async (req: IRequest, res: any, next: NextFunction) => {
 
         const user = await User.findByPk(decoded.sub)
 
-        console.log(user)
-
         if (user?.role !== 'admin') {
             throw new ForBiddenError({ message: 'You are not authorized to access this resource' })
         }

@@ -423,7 +423,6 @@ class PostService {
                         as: 'detail',
                     },
                 ],
-                logging: console.log,
                 limit: 10,
                 order: [['id', 'DESC']],
             })
