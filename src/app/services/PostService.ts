@@ -25,7 +25,7 @@ interface CreatePostParams {
     type: 'sell' | 'rent'
     images: string[]
     category_id: number
-    role: 'user' | 'agent'
+    role: 'personal' | 'agent'
     post_detail: PostDetailInterface
     userId: number
 }
@@ -105,7 +105,7 @@ class PostService {
     getPosts = async ({
         page,
         per_page,
-        type,
+        role,
         category_id,
         location,
         userId,
@@ -113,7 +113,7 @@ class PostService {
     }: {
         page: number
         per_page: number
-        type?: 'sell' | 'rent'
+        role?: 'personal' | 'agent'
         category_id?: number
         location?: string
         userId: number | null
@@ -122,8 +122,8 @@ class PostService {
         try {
             const whereClause: any = {}
 
-            if (type) {
-                whereClause.type = type
+            if (role) {
+                whereClause.role = role
             }
 
             if (category_id) {
@@ -423,7 +423,7 @@ class PostService {
                         as: 'detail',
                     },
                 ],
-                limit: 10,
+                limit: 5,
                 order: [['id', 'DESC']],
             })
 

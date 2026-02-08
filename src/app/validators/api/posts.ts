@@ -12,7 +12,7 @@ export const createPostSchema = z.object({
         type: z.enum(['sell', 'rent']),
         images: z.array(z.url()),
         category_id: z.number(),
-        role: z.enum(['user', 'agent']),
+        role: z.enum(['personal', 'agent']),
 
         post_detail: z.object({
             bedrooms: z.number(),
@@ -38,7 +38,7 @@ export const updatePostSchema = z.object({
 export const getPostsSchema = z.object({
     query: paginationSchema.shape.query.extend({
         category_id: z.coerce.number().int().positive().transform(String).optional(),
-        type: z.enum(['sell', 'rent']).optional(),
+        role: z.enum(['personal', 'agent']).optional(),
         location: z.string().optional(),
         approval_status: z.enum(['approved', 'pending', 'rejected', 'all']).optional(),
     }),

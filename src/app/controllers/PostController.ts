@@ -46,20 +46,24 @@ class PostController {
 
     getPosts = async (req: GetPostsRequest, res: Response, next: NextFunction) => {
         try {
-            const { page, per_page, type, category_id, location, approval_status } = req.query
+            const { page, per_page, role, category_id, location, approval_status } = req.query
 
             const { access_token } = req.cookies
 
             let decoded: (JwtPayload & { sub: number }) | null = null
 
             if (access_token) {
-                decoded = jwt.verify(access_token, process.env.JWT_SECRET as string) as JwtPayload & { sub: number }
+                try {
+                    decoded = jwt.verify(access_token, process.env.JWT_SECRET as string) as JwtPayload & { sub: number }
+                } catch (_) {
+                    decoded = null
+                }
             }
 
             const { posts, total } = await PostService.getPosts({
                 page: Number(page),
                 per_page: Number(per_page),
-                type,
+                role,
                 category_id: category_id ? Number(category_id) : undefined,
                 location,
                 userId: decoded?.sub ?? null,

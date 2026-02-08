@@ -14,7 +14,7 @@ class Post extends Model<InferAttributes<Post>, InferCreationAttributes<Post>> {
     declare handover_status: 'not_delivered' | 'delivered'
     declare category_id: number
     declare user_id: number
-    declare role: 'user' | 'agent'
+    declare role: 'personal' | 'agent'
     declare created_at?: Date
     declare updated_at?: Date
 }
@@ -71,9 +71,9 @@ Post.init(
             allowNull: false,
         },
         role: {
-            type: DataTypes.ENUM('user', 'agent'),
+            type: DataTypes.ENUM('personal', 'agent'),
             allowNull: false,
-            defaultValue: 'user',
+            defaultValue: 'personal',
         },
     },
     {
