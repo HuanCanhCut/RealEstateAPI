@@ -17,6 +17,11 @@ class Post extends Model<InferAttributes<Post>, InferCreationAttributes<Post>> {
     declare role: 'personal' | 'agent'
     declare created_at?: Date
     declare updated_at?: Date
+
+    /**
+     * Virtual field
+     */
+    declare is_liked?: boolean | number
 }
 
 Post.init(
@@ -86,5 +91,13 @@ Post.init(
         },
     },
 )
+
+Post.prototype.toJSON = function () {
+    const values = { ...this.get() }
+    if ('is_liked' in values) {
+        values.is_liked = Boolean(values.is_liked)
+    }
+    return values
+}
 
 export default Post

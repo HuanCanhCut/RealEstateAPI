@@ -81,7 +81,7 @@ class PostService {
 
             await t.commit()
 
-            const postData = await Post.findByPk(post.id, {
+            const postData = await Post.unscoped().findByPk(post.id, {
                 include: [
                     {
                         model: PostDetail,
@@ -168,12 +168,15 @@ class PostService {
                     include: [
                         [
                             sequelize.literal(`
-                                EXISTS (
-                                    SELECT 1
-                                    FROM favorites
-                                    WHERE favorites.user_id = ${sequelize.escape(userId || 0)}
-                                      AND favorites.post_id = Post.id
-                                )
+                                CASE 
+                                    WHEN EXISTS (
+                                        SELECT 1
+                                        FROM favorites
+                                        WHERE favorites.user_id = ${sequelize.escape(userId || 0)}
+                                          AND favorites.post_id = Post.id
+                                    ) THEN TRUE
+                                    ELSE FALSE
+                                END
                             `),
                             'is_liked',
                         ],
@@ -349,11 +352,6 @@ class PostService {
 
             if (!post) {
                 throw new NotFoundError({ message: 'Post not found' })
-            }
-
-            // check if user is the owner of the post
-            if (post.user_id === userId) {
-                throw new BadRequestError({ message: 'You cannot like or unlike your own post' })
             }
 
             const favorite = await Favorite.findOne({
