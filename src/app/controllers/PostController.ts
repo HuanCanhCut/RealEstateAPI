@@ -46,7 +46,7 @@ class PostController {
 
     getPosts = async (req: GetPostsRequest, res: Response, next: NextFunction) => {
         try {
-            const { page, per_page, role, category_id, location, approval_status } = req.query
+            const { page, per_page, role, category_id, location, approval_status, min_price, max_price } = req.query
 
             const { access_token } = req.cookies
 
@@ -68,6 +68,8 @@ class PostController {
                 location,
                 userId: decoded?.sub ?? null,
                 approval_status,
+                min_price: min_price ? Number(min_price) : undefined,
+                max_price: max_price ? Number(max_price) : undefined,
             })
 
             res.json(

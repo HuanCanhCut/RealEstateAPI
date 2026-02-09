@@ -110,6 +110,8 @@ class PostService {
         location,
         userId,
         approval_status,
+        min_price,
+        max_price,
     }: {
         page: number
         per_page: number
@@ -118,6 +120,8 @@ class PostService {
         location?: string
         userId: number | null
         approval_status?: 'approved' | 'pending' | 'rejected' | 'all'
+        min_price?: number
+        max_price?: number
     }) => {
         try {
             const whereClause: any = {}
@@ -132,7 +136,7 @@ class PostService {
 
             if (location) {
                 whereClause.administrative_address = {
-                    [Op.like]: `${location}%`,
+                    [Op.like]: `%${location}%`,
                 }
             }
 
@@ -154,6 +158,12 @@ class PostService {
                     {
                         model: PostDetail,
                         as: 'detail',
+                        where: {
+                            price: {
+                                [Op.gte]: min_price || 0,
+                                [Op.lte]: max_price || 999999999999999,
+                            },
+                        },
                     },
                     {
                         model: Category,

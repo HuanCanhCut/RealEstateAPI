@@ -41,6 +41,8 @@ export const getPostsSchema = z.object({
         role: z.enum(['personal', 'agent']).optional(),
         location: z.string().optional(),
         approval_status: z.enum(['approved', 'pending', 'rejected', 'all']).optional(),
+        min_price: z.coerce.number().int().nonnegative().transform(String).optional(),
+        max_price: z.coerce.number().int().nonnegative().transform(String).optional(),
     }),
 })
 
