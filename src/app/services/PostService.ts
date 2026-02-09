@@ -323,6 +323,10 @@ class PostService {
                         model: User,
                         as: 'user',
                     },
+                    {
+                        model: Category,
+                        as: 'category',
+                    },
                 ],
                 attributes: {
                     include: [

@@ -153,7 +153,11 @@ class PostController {
             let decoded: (JwtPayload & { sub: number }) | null = null
 
             if (access_token) {
-                decoded = jwt.verify(access_token, process.env.JWT_SECRET as string) as JwtPayload & { sub: number }
+                try {
+                    decoded = jwt.verify(access_token, process.env.JWT_SECRET as string) as JwtPayload & { sub: number }
+                } catch (_) {
+                    decoded = null
+                }
             }
 
             const post = await PostService.getPostById({ postId: Number(postId), userId: decoded?.sub ?? null })
