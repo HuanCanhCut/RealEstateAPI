@@ -1,4 +1,4 @@
-import { Category, Contract, Favorite, Post, PostDetail, RefreshToken, User } from './index'
+import { Category, Comment, Contract, Favorite, Post, PostDetail, RefreshToken, User } from './index'
 
 const associations = () => {
     // User relations
@@ -25,6 +25,9 @@ const associations = () => {
 
     User.hasMany(RefreshToken, { foreignKey: 'user_id', as: 'refresh_tokens' })
     RefreshToken.belongsTo(User, { foreignKey: 'user_id', as: 'user' })
+
+    User.hasMany(Comment, { foreignKey: 'user_id', as: 'comments' })
+    Comment.belongsTo(User, { foreignKey: 'user_id', as: 'user' })
 }
 
 export default associations

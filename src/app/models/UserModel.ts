@@ -18,6 +18,11 @@ class User extends Model<InferAttributes<User>, InferCreationAttributes<User>> {
     declare is_blocked: boolean
     declare created_at?: Date
     declare updated_at?: Date
+
+    /**
+     * Virtual field
+     */
+    declare total_posts?: number
 }
 User.init(
     {
@@ -36,6 +41,12 @@ User.init(
             type: DataTypes.STRING,
             allowNull: false,
             defaultValue: '',
+        },
+        full_name: {
+            type: DataTypes.VIRTUAL,
+            get() {
+                return `${this.getDataValue('first_name')} ${this.getDataValue('last_name')}`
+            },
         },
         nickname: {
             type: DataTypes.STRING,

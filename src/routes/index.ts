@@ -3,6 +3,7 @@ import { Express, Request, Response } from 'express'
 import analyticRoute from './analytic'
 import authRoute from './auth'
 import categoryRoute from './category'
+import commentRoute from './comment'
 import postRoute from './post'
 import userRoute from './user'
 import errorHandler from '~/app/errors/errorHandler'
@@ -14,6 +15,7 @@ const route = (app: Express) => {
     app.use('/api/users', userRoute)
     app.use('/api/categories', categoryRoute)
     app.use('/api/analytics', analyticRoute)
+    app.use('/api/comments', commentRoute)
 
     app.all('*', (req: Request, res: Response) => {
         res.status(404).json({

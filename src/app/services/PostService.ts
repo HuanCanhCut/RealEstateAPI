@@ -322,6 +322,18 @@ class PostService {
                     {
                         model: User,
                         as: 'user',
+                        attributes: {
+                            include: [
+                                [
+                                    sequelize.literal(`(
+                                        SELECT COUNT(1)
+                                        FROM posts
+                                        WHERE posts.user_id = user.id
+                                    )`),
+                                    'post_count',
+                                ],
+                            ],
+                        },
                     },
                     {
                         model: Category,
@@ -343,6 +355,7 @@ class PostService {
                         ],
                     ],
                 },
+                logging: console.log,
             })
 
             if (!post) {
