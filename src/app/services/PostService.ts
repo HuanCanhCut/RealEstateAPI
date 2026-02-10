@@ -355,7 +355,6 @@ class PostService {
                         ],
                     ],
                 },
-                logging: console.log,
             })
 
             if (!post) {

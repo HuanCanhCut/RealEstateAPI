@@ -2,7 +2,7 @@ import express from 'express'
 
 import CommentController from '~/app/controllers/CommentController'
 import { validate } from '~/app/middlewares/validate'
-import { getCommentsSchema } from '~/app/validators/api/paginationSchema'
+import { getCommentsSchema } from '~/app/validators/api/commentSchema'
 
 const router = express.Router()
 

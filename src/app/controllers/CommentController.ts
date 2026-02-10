@@ -1,7 +1,7 @@
 import { NextFunction, Response } from 'express'
 
 import CommentService from '../services/CommentService'
-import { GetCommentsRequest } from '../validators/api/paginationSchema'
+import { GetCommentsRequest } from '../validators/api/commentSchema'
 
 class CommentController {
     getComments = async (req: GetCommentsRequest, res: Response, next: NextFunction) => {
