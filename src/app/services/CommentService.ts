@@ -45,7 +45,7 @@ class CommentService {
                     },
                     limit,
                     offset,
-                    order: [['created_at', 'DESC']],
+                    order: [['id', 'DESC']],
                 }),
                 Comment.count({
                     where: {
@@ -59,6 +59,35 @@ class CommentService {
                 total,
                 totalComments,
             }
+        } catch (error: any) {
+            if (error instanceof AppError) {
+                throw error
+            }
+
+            throw new InternalServerError({ message: error.message + ' ' + error.stack })
+        }
+    }
+
+    getCommentById = async (id: number) => {
+        try {
+            const comment = await Comment.findByPk(id, {
+                include: [
+                    {
+                        model: User,
+                        as: 'user',
+                    },
+                ],
+                attributes: {
+                    include: [
+                        [
+                            sequelize.literal(`(SELECT COUNT(1) FROM comments WHERE comments.parent_id = Comment.id)`),
+                            'reply_count',
+                        ],
+                    ],
+                },
+            })
+
+            return comment
         } catch (error: any) {
             if (error instanceof AppError) {
                 throw error

@@ -21,8 +21,8 @@ class CommentController {
                     pagination: {
                         total,
                         count: comments.length,
-                        limit,
-                        offset,
+                        limit: Number(limit),
+                        offset: Number(offset),
                     },
                     total_comments: totalComments,
                 },

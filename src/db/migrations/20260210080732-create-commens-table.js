@@ -22,6 +22,8 @@ module.exports = {
                     model: 'users',
                     key: 'id',
                 },
+                onUpdate: 'CASCADE',
+                onDelete: 'CASCADE',
             },
             post_id: {
                 type: Sequelize.INTEGER,
@@ -30,6 +32,8 @@ module.exports = {
                     model: 'posts',
                     key: 'id',
                 },
+                onUpdate: 'CASCADE',
+                onDelete: 'CASCADE',
             },
             parent_id: {
                 type: Sequelize.INTEGER,
@@ -38,6 +42,8 @@ module.exports = {
                     model: 'comments',
                     key: 'id',
                 },
+                onUpdate: 'CASCADE',
+                onDelete: 'CASCADE',
             },
             content: {
                 type: Sequelize.TEXT,

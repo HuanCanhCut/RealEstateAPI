@@ -12,7 +12,9 @@ const socketIO = (io: Server<ClientToServerEvents, ServerToClientEvents, InterSe
         onConnection(socketInstance, ioInstance)
 
         socketInstance.on('disconnect', async () => {
-            console.log('\x1b[33m===>>>Socket disconnected!!!', '\x1b[0m')
+            if (process.env.NODE_ENV === 'development') {
+                console.log('\x1b[33m===>>>Socket disconnected!!!', '\x1b[0m')
+            }
         })
     })
 }

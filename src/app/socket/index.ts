@@ -1,6 +1,7 @@
 import jwt from 'jsonwebtoken'
 import { Server, Socket } from 'socket.io'
 
+import commentListener from './comment'
 import { redisClient } from '~/config/redis'
 import { RedisKey } from '~/enum/redis'
 import { ClientToServerEvents, InterServerEvents, ServerToClientEvents } from '~/types/socket'
@@ -9,7 +10,9 @@ const onConnection = async (
     socketInstance: Socket<ClientToServerEvents, ServerToClientEvents, InterServerEvents>,
     ioInstance: Server<ClientToServerEvents, ServerToClientEvents, InterServerEvents>,
 ) => {
-    console.log('\x1b[33m===>>>Socket connected', socketInstance.id, '\x1b[0m')
+    if (process.env.NODE_ENV === 'development') {
+        console.log('\x1b[33m===>>>Socket connected', socketInstance.id, '\x1b[0m')
+    }
 
     const cookies = socketInstance.handshake.headers.cookie
 
@@ -36,7 +39,7 @@ const onConnection = async (
     }
 
     // Listen event
-    // new commentListener(socketInstance)
+    new commentListener(socketInstance)
 
     socketInstance.on('disconnect', async () => {
         if (decoded) {
