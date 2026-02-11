@@ -3,6 +3,7 @@ import cors from 'cors'
 import express from 'express'
 import admin from 'firebase-admin'
 import http from 'http'
+import { Server } from 'socket.io'
 
 import './config/env'
 import setupGlobalErrorHandling from './app/errors/globalError'
@@ -13,7 +14,9 @@ import './app/queue'
 import * as database from './config/database/index'
 import serviceAccount from './config/firebase/serviceAccount'
 import { redisClient } from './config/redis'
+import socketIO from './config/socket'
 import route from './routes/index'
+import { ClientToServerEvents, InterServerEvents, ServerToClientEvents } from './types/socket'
 const app = express()
 const server = http.createServer(app)
 
@@ -38,6 +41,20 @@ const corsOptions: cors.CorsOptions = {
 }
 
 app.use(cors(corsOptions))
+
+const io = new Server<ClientToServerEvents, ServerToClientEvents, InterServerEvents>(server, {
+    cors: {
+        origin: function (origin, callback) {
+            if (!origin) return callback(null, true)
+            if (allowedOrigins.includes(origin)) {
+                callback(null, true)
+            } else {
+                callback(new Error('CORS not allowed by server'))
+            }
+        },
+        credentials: true,
+    },
+})
 
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount as admin.ServiceAccount),
@@ -65,6 +82,7 @@ app.use(cookieParser())
 app.set('trust proxy', true)
 
 route(app)
+socketIO(io)
 
 server.listen(process.env.PORT, () => {
     console.log(`Server is running on port ${process.env.PORT}`)

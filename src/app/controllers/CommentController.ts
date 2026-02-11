@@ -8,7 +8,7 @@ class CommentController {
         try {
             const { limit, offset, parent_id, post_id } = req.query
 
-            const { comments, total } = await CommentService.getComments({
+            const { comments, total, totalComments } = await CommentService.getComments({
                 limit: Number(limit),
                 offset: Number(offset),
                 parent_id: parent_id ? Number(parent_id) : null,
@@ -24,6 +24,7 @@ class CommentController {
                         limit,
                         offset,
                     },
+                    total_comments: totalComments,
                 },
             })
         } catch (error) {
