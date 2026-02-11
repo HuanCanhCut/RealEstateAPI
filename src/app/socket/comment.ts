@@ -14,7 +14,7 @@ class commentListener {
         this.socket.on('JOIN_POST_COMMENTS', socketCommentService.JOIN_POST_COMMENTS)
         this.socket.on('LEAVE_POST_COMMENTS', socketCommentService.LEAVE_POST_COMMENTS)
         this.socket.on('NEW_COMMENT', socketCommentService.NEW_COMMENT)
-        // this.socket.on('DELETE_COMMENT', socketCommentService.DELETE_COMMENT)
+        this.socket.on('DELETE_COMMENT', socketCommentService.DELETE_COMMENT)
     }
 }
 

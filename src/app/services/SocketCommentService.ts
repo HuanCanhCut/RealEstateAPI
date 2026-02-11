@@ -3,6 +3,7 @@ import { Socket } from 'socket.io'
 import { Comment } from '../models'
 import CommentService from './CommentService'
 import { ioInstance } from '~/config/socket'
+import { SocketRoom } from '~/enum/socketRoom'
 import logger from '~/logger/logger'
 import type { ClientToServerEvents, InterServerEvents, ServerToClientEvents } from '~/types/socket'
 
@@ -18,7 +19,7 @@ class SocketCommentService {
     JOIN_POST_COMMENTS = async ({ post_id }: { post_id: number }) => {
         try {
             // Join comments channel
-            this.socket?.join(`comment:post:${post_id}`)
+            this.socket?.join(`${SocketRoom.COMMENT_POST}${post_id}`)
         } catch (error) {
             logger.error('JOIN_POST_COMMENTS', error)
         }
@@ -27,7 +28,7 @@ class SocketCommentService {
     LEAVE_POST_COMMENTS = async ({ post_id }: { post_id: number }) => {
         try {
             // Leave comments channel
-            this.socket?.leave(`comment:post:${post_id}`)
+            this.socket?.leave(`${SocketRoom.COMMENT_POST}${post_id}`)
         } catch (error) {
             logger.error('LEAVE_POST_COMMENTS', error)
         }
@@ -45,7 +46,7 @@ class SocketCommentService {
             const newComment = await CommentService.getCommentById(comment.id!)
 
             if (newComment) {
-                ioInstance.to(`comment:post:${post_id}`).emit('NEW_COMMENT', {
+                ioInstance.to(`${SocketRoom.COMMENT_POST}${post_id}`).emit('NEW_COMMENT', {
                     data: newComment,
                     meta: { success: true, error: null },
                 })
@@ -54,7 +55,7 @@ class SocketCommentService {
                     const parent = await CommentService.getCommentById(newComment.parent_id)
 
                     if (parent) {
-                        this.socket.broadcast.to(`comment:post:${post_id}`).emit('COMMENT_REPLY_META', {
+                        this.socket.broadcast.to(`${SocketRoom.COMMENT_POST}${post_id}`).emit('COMMENT_REPLY_META', {
                             data: { comment_id: parent.id!, delta: 1 },
                             meta: { success: true, error: null },
                         })
@@ -81,48 +82,44 @@ class SocketCommentService {
         }
     }
 
-    // DELETE_COMMENT = async ({ comment_id }: { comment_id: number }) => {
-    //     try {
-    //         const comment = await Comment.findByPk(comment_id)
+    DELETE_COMMENT = async ({ comment_id }: { comment_id: number }) => {
+        try {
+            const comment = await Comment.findByPk(comment_id)
 
-    //         if (!comment) {
-    //             this.socket?.emit('DELETED_COMMENT', {
-    //                 data: { comment_id },
-    //                 meta: { success: false, error: 'Không tìm thấy comment này' },
-    //             })
+            if (!comment) {
+                this.socket?.emit('DELETED_COMMENT', {
+                    data: { comment_id },
+                    meta: { success: false, error: 'Không tìm thấy comment này' },
+                })
 
-    //             return
-    //         }
+                return
+            }
 
-    //         if (comment.user_id !== this.currentUserId) {
-    //             this.socket?.emit('DELETED_COMMENT', {
-    //                 data: { comment_id },
-    //                 meta: { success: false, error: 'Bạn không có quyền xóa comment này' },
-    //             })
-    //         }
+            if (comment.user_id !== this.currentUserId) {
+                this.socket?.emit('DELETED_COMMENT', {
+                    data: { comment_id },
+                    meta: { success: false, error: 'Bạn không có quyền xóa comment này' },
+                })
+            }
 
-    //         await Comment.destroy({ where: { id: comment_id } })
+            await Comment.destroy({ where: { id: comment_id } })
 
-    //         if (comment.commentable_type === 'Comment') {
-    //             const parent = await CommentService.getCommentById(comment.commentable_id!)
-    //             if (parent) {
-    //                 ioInstance
-    //                     .to(`comment:${parent.commentable_type}:${parent.commentable_id}`)
-    //                     .emit('COMMENT_REPLY_META', {
-    //                         data: { comment_id: parent.id!, delta: -1 },
-    //                         meta: { success: true, error: null },
-    //                     })
-    //             }
-    //         }
+            ioInstance.to(`${SocketRoom.COMMENT_POST}${comment.post_id}`).emit('DELETED_COMMENT', {
+                data: { comment_id },
+                meta: { success: true, error: null },
+            })
+        } catch (error) {
+            this.socket?.emit('NEW_COMMENT', {
+                data: null,
+                meta: {
+                    success: false,
+                    error: error instanceof Error ? error.message : 'An unknown error occurred',
+                },
+            })
 
-    //         ioInstance.to(`comment:${comment.commentable_type}:${comment.commentable_id}`).emit('DELETED_COMMENT', {
-    //             data: { comment_id },
-    //             meta: { success: true, error: null },
-    //         })
-    //     } catch (error) {
-    //         logger.error('DELETE_COMMENT', error)
-    //     }
-    // }
+            logger.error('DELETE_COMMENT', error)
+        }
+    }
 }
 
 export default SocketCommentService
