@@ -30,6 +30,8 @@ Comment.init(
                 model: 'users',
                 key: 'id',
             },
+            onUpdate: 'CASCADE',
+            onDelete: 'CASCADE',
         },
         post_id: {
             type: DataTypes.INTEGER,
@@ -38,6 +40,8 @@ Comment.init(
                 model: 'posts',
                 key: 'id',
             },
+            onUpdate: 'CASCADE',
+            onDelete: 'CASCADE',
         },
         parent_id: {
             type: DataTypes.INTEGER,
@@ -46,6 +50,8 @@ Comment.init(
                 model: 'comments',
                 key: 'id',
             },
+            onUpdate: 'CASCADE',
+            onDelete: 'CASCADE',
         },
         content: {
             type: DataTypes.TEXT,
