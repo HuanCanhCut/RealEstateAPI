@@ -1,13 +1,27 @@
 import { pickBy } from 'lodash'
 
 import { AppError, InternalServerError, NotFoundError } from '../errors/errors'
-import { Post, User } from '../models'
+import { User } from '../models'
 import { sequelize } from '~/config/database'
 
 class UserService {
     getUserByNickname = async (nickname: string) => {
         try {
-            const user = await User.findOne({ where: { nickname } })
+            const user = await User.findOne({
+                where: { nickname },
+                attributes: {
+                    include: [
+                        [
+                            sequelize.literal(`(
+                                SELECT COUNT(1)
+                                FROM posts
+                                WHERE posts.user_id = User.id AND posts.approval_status = 'approved'
+                        )`),
+                            'post_count',
+                        ],
+                    ],
+                },
+            })
 
             if (!user) {
                 throw new NotFoundError({ message: 'User not found' })
