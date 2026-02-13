@@ -12,6 +12,8 @@ const router = express.Router()
 
 router.get('/', validate(paginationSchema), verifyToken, UserController.getUsers)
 router.get('/:id/posts', validate(getUserPostsSchema), PostController.getUserPosts)
+router.get('/:id/pending', validate(paginationSchema), verifyToken, PostController.getUserPendingPosts)
+router.get('/:id/rejected', validate(paginationSchema), verifyToken, PostController.getUserRejectedPosts)
 router.patch('/me', validate(updateCurrentUserSchema), verifyToken, UserController.updateCurrentUser)
 router.get('/:nickname', validate(getUserByNicknameSchema), UserController.getUserByNickname)
 

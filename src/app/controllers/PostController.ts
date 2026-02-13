@@ -3,7 +3,7 @@ import jwt, { JwtPayload } from 'jsonwebtoken'
 
 import { responsePagination } from '../response/responsePagination'
 import PostService from '../services/PostService'
-import { IdRequest } from '../validators/api/commonSchema'
+import { IdRequest, PaginationRequest } from '../validators/api/commonSchema'
 import {
     CreatePostRequest,
     GetPostsRequest,
@@ -283,13 +283,80 @@ class PostController {
             const { page, per_page, favorite } = req.query
             const { id } = req.params
 
-            console.log(favorite)
+            let decoded: (JwtPayload & { sub: number }) | null = null
+
+            const { access_token } = req.cookies
+
+            if (access_token) {
+                try {
+                    decoded = jwt.verify(access_token, process.env.JWT_SECRET as string) as JwtPayload & { sub: number }
+                } catch (_) {
+                    decoded = null
+                }
+            }
 
             const { posts, total } = await PostService.getUserPosts({
                 userId: Number(id),
                 page: Number(page),
                 per_page: Number(per_page),
                 favorite: favorite !== undefined,
+                currentUserId: decoded?.sub ?? 0,
+            })
+
+            res.json(
+                responsePagination({
+                    req,
+                    data: posts,
+                    total,
+                    count: posts.length,
+                    current_page: Number(page),
+                    per_page: Number(per_page),
+                }),
+            )
+        } catch (error) {
+            return next(error)
+        }
+    }
+
+    getUserPendingPosts = async (req: PaginationRequest, res: Response, next: NextFunction) => {
+        try {
+            const { page, per_page } = req.query
+
+            const decoded = req.decoded
+
+            const { posts, total } = await PostService.getUserPostApproval({
+                page: Number(page),
+                per_page: Number(per_page),
+                currentUserId: decoded?.sub,
+                type: 'pending',
+            })
+
+            res.json(
+                responsePagination({
+                    req,
+                    data: posts,
+                    total,
+                    count: posts.length,
+                    current_page: Number(page),
+                    per_page: Number(per_page),
+                }),
+            )
+        } catch (error) {
+            return next(error)
+        }
+    }
+
+    getUserRejectedPosts = async (req: PaginationRequest, res: Response, next: NextFunction) => {
+        try {
+            const { page, per_page } = req.query
+
+            const decoded = req.decoded
+
+            const { posts, total } = await PostService.getUserPostApproval({
+                page: Number(page),
+                per_page: Number(per_page),
+                currentUserId: decoded?.sub,
+                type: 'rejected',
             })
 
             res.json(

@@ -513,11 +513,13 @@ class PostService {
         page,
         per_page,
         favorite,
+        currentUserId,
     }: {
         userId: number
         page: number
         per_page: number
         favorite: boolean
+        currentUserId: number
     }) => {
         try {
             const includes: any = [
@@ -548,6 +550,21 @@ class PostService {
 
             const { rows: posts, count: total } = await Post.findAndCountAll({
                 include: includes,
+                attributes: {
+                    include: [
+                        [
+                            sequelize.literal(`
+                                EXISTS (
+                                    SELECT 1
+                                    FROM favorites
+                                    WHERE favorites.user_id = ${sequelize.escape(currentUserId || 0)}
+                                      AND favorites.post_id = Post.id
+                                )
+                            `),
+                            'is_liked',
+                        ],
+                    ],
+                },
                 where: {
                     user_id: userId,
                 },
@@ -557,6 +574,56 @@ class PostService {
             })
 
             return { posts, total }
+        } catch (error: any) {
+            if (error instanceof AppError) {
+                throw error
+            }
+
+            throw new InternalServerError({ message: error.message + ' ' + error.stack })
+        }
+    }
+
+    getUserPostApproval = async ({
+        currentUserId,
+        page,
+        per_page,
+        type,
+    }: {
+        currentUserId: number
+        page: number
+        per_page: number
+        type: 'pending' | 'rejected'
+    }) => {
+        try {
+            const { rows: posts, count: total } = await Post.unscoped().findAndCountAll({
+                include: [
+                    {
+                        model: PostDetail,
+                        as: 'detail',
+                    },
+                    {
+                        model: Category,
+                        as: 'category',
+                    },
+                    {
+                        model: User,
+                        as: 'user',
+                    },
+                ],
+
+                where: {
+                    user_id: currentUserId,
+                    approval_status: type,
+                },
+                limit: per_page,
+                offset: (page - 1) * per_page,
+                order: [['id', 'DESC']],
+            })
+
+            return {
+                posts,
+                total,
+            }
         } catch (error: any) {
             if (error instanceof AppError) {
                 throw error
