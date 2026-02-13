@@ -280,13 +280,16 @@ class PostController {
 
     getUserPosts = async (req: GetUserPostsRequest, res: Response, next: NextFunction) => {
         try {
-            const { page, per_page } = req.query
+            const { page, per_page, favorite } = req.query
             const { id } = req.params
+
+            console.log(favorite)
 
             const { posts, total } = await PostService.getUserPosts({
                 userId: Number(id),
                 page: Number(page),
                 per_page: Number(per_page),
+                favorite: favorite !== undefined,
             })
 
             res.json(

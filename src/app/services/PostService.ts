@@ -508,23 +508,46 @@ class PostService {
         }
     }
 
-    getUserPosts = async ({ userId, page, per_page }: { userId: number; page: number; per_page: number }) => {
+    getUserPosts = async ({
+        userId,
+        page,
+        per_page,
+        favorite,
+    }: {
+        userId: number
+        page: number
+        per_page: number
+        favorite: boolean
+    }) => {
         try {
+            const includes: any = [
+                {
+                    model: PostDetail,
+                    as: 'detail',
+                },
+                {
+                    model: Category,
+                    as: 'category',
+                },
+                {
+                    model: User,
+                    as: 'user',
+                },
+            ]
+
+            if (favorite) {
+                includes.push({
+                    model: Favorite,
+                    as: 'favorites',
+                    attributes: [],
+                    where: {
+                        user_id: userId,
+                    },
+                })
+            }
+
             const { rows: posts, count: total } = await Post.findAndCountAll({
-                include: [
-                    {
-                        model: PostDetail,
-                        as: 'detail',
-                    },
-                    {
-                        model: Category,
-                        as: 'category',
-                    },
-                    {
-                        model: User,
-                        as: 'user',
-                    },
-                ],
+                include: includes,
                 where: {
                     user_id: userId,
                 },

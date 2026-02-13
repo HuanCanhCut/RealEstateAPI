@@ -53,7 +53,9 @@ export const searchPostsSchema = z.object({
 })
 
 export const getUserPostsSchema = z.object({
-    query: paginationSchema.shape.query,
+    query: paginationSchema.shape.query.extend({
+        favorite: z.string().optional(),
+    }),
     params: idSchema.shape.params,
 })
 
