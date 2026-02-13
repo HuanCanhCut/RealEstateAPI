@@ -507,6 +507,41 @@ class PostService {
             throw new InternalServerError({ message: error.message + ' ' + error.stack })
         }
     }
+
+    getUserPosts = async ({ userId, page, per_page }: { userId: number; page: number; per_page: number }) => {
+        try {
+            const { rows: posts, count: total } = await Post.findAndCountAll({
+                include: [
+                    {
+                        model: PostDetail,
+                        as: 'detail',
+                    },
+                    {
+                        model: Category,
+                        as: 'category',
+                    },
+                    {
+                        model: User,
+                        as: 'user',
+                    },
+                ],
+                where: {
+                    user_id: userId,
+                },
+                limit: per_page,
+                offset: (page - 1) * per_page,
+                order: [['id', 'DESC']],
+            })
+
+            return { posts, total }
+        } catch (error: any) {
+            if (error instanceof AppError) {
+                throw error
+            }
+
+            throw new InternalServerError({ message: error.message + ' ' + error.stack })
+        }
+    }
 }
 
 export default new PostService()

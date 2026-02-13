@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-import { paginationSchema } from './commonSchema'
+import { idSchema, paginationSchema } from './commonSchema'
 import { TypedRequest } from '~/types/request'
 
 export const createPostSchema = z.object({
@@ -52,6 +52,11 @@ export const searchPostsSchema = z.object({
     }),
 })
 
+export const getUserPostsSchema = z.object({
+    query: paginationSchema.shape.query,
+    params: idSchema.shape.params,
+})
+
 export type CreatePostRequest = TypedRequest<z.infer<typeof createPostSchema>['body']>
 export type UpdatePostRequest = TypedRequest<
     z.infer<typeof updatePostSchema>['body'],
@@ -59,3 +64,8 @@ export type UpdatePostRequest = TypedRequest<
 >
 export type GetPostsRequest = TypedRequest<any, any, z.infer<typeof getPostsSchema>['query']>
 export type SearchPostsRequest = TypedRequest<any, any, z.infer<typeof searchPostsSchema>['query']>
+export type GetUserPostsRequest = TypedRequest<
+    any,
+    z.infer<typeof getUserPostsSchema>['params'],
+    z.infer<typeof getUserPostsSchema>['query']
+>
