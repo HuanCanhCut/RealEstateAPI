@@ -313,7 +313,7 @@ class PostService {
 
     getPostById = async ({ postId, userId }: { postId: number; userId: number | null }) => {
         try {
-            const post = await Post.findByPk(postId, {
+            const post = await Post.unscoped().findByPk(postId, {
                 include: [
                     {
                         model: PostDetail,
@@ -359,6 +359,12 @@ class PostService {
 
             if (!post) {
                 throw new NotFoundError({ message: 'Post not found' })
+            }
+
+            if (post.get('approval_status') === 'pending' || post.get('approval_status') === 'rejected') {
+                if (post.user_id !== userId) {
+                    throw new NotFoundError({ message: 'Post not found' })
+                }
             }
 
             return post
