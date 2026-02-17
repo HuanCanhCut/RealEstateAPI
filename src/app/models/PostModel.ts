@@ -9,7 +9,7 @@ class Post extends Model<InferAttributes<Post>, InferCreationAttributes<Post>> {
     declare administrative_address: string
     declare sub_locality: string
     declare type: 'sell' | 'rent'
-    declare images?: string
+    declare images: string
     declare approval_status: 'approved' | 'pending' | 'rejected'
     declare handover_status: 'not_delivered' | 'delivered'
     declare category_id: number
@@ -97,6 +97,11 @@ Post.prototype.toJSON = function () {
     if ('is_liked' in values) {
         values.is_liked = Boolean(values.is_liked)
     }
+
+    if ('images' in values) {
+        values.images = JSON.parse(values.images)
+    }
+
     return values
 }
 

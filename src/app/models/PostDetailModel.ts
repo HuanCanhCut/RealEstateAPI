@@ -73,4 +73,17 @@ PostDetail.init(
     },
 )
 
+PostDetail.prototype.toJSON = function () {
+    const values = { ...this.get() }
+    if ('deposit' in values) {
+        values.deposit = Number(values.deposit)
+    }
+
+    if ('price' in values) {
+        values.price = Number(values.price)
+    }
+
+    return values
+}
+
 export default PostDetail
