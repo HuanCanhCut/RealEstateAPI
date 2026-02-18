@@ -1,12 +1,25 @@
-import { AppError, NotFoundError } from '../errors/errors'
+import { AppError, BadRequestError, NotFoundError } from '../errors/errors'
 import { InternalServerError } from '../errors/errors'
 import { Category } from '../models'
+import { sequelize } from '~/config/database'
 
 class CategoryService {
     getCategories = async (page: number, per_page: number) => {
         try {
             const { rows: categories, count: total } = await Category.findAndCountAll({
                 distinct: true,
+                attributes: {
+                    include: [
+                        [
+                            sequelize.literal(`(
+                                SELECT COUNT(1)
+                                FROM posts
+                                WHERE posts.category_id = Category.id
+                            )`),
+                            'post_count',
+                        ],
+                    ],
+                },
                 limit: per_page,
                 offset: (page - 1) * per_page,
             })
@@ -26,6 +39,16 @@ class CategoryService {
 
     createCategory = async ({ name }: { name: string }) => {
         try {
+            const hasCategory = await Category.findOne({
+                where: {
+                    name,
+                },
+            })
+
+            if (hasCategory) {
+                throw new BadRequestError({ message: 'Danh mục đã tồn tại' })
+            }
+
             const category = await Category.create({ name })
 
             return category
