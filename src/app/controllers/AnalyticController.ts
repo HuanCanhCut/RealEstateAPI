@@ -26,6 +26,18 @@ class AnalyticController {
             return next(error)
         }
     }
+
+    getMonthlyRegistrations = async (req: IRequest, res: Response, next: NextFunction) => {
+        try {
+            const userStats = await AnalyticService.getUsersMonthlyRegistrations()
+
+            res.json({
+                data: userStats,
+            })
+        } catch (error) {
+            return next(error)
+        }
+    }
 }
 
 export default new AnalyticController()

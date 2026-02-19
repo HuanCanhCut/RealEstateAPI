@@ -42,6 +42,57 @@ class AnalyticService {
             throw new InternalServerError({ message: error.message + ' ' + error.stack })
         }
     }
+
+    getUsersMonthlyRegistrations = async () => {
+        try {
+            const now = new Date()
+
+            const past90Days = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000)
+
+            const rows = await User.findAll({
+                attributes: [
+                    [fn('YEAR', col('created_at')), 'year'],
+                    [fn('MONTH', col('created_at')), 'month'],
+                    [fn('COUNT', col('id')), 'count'],
+                ],
+                where: {
+                    created_at: {
+                        [Op.between]: [past90Days, now],
+                    },
+                },
+                group: [fn('YEAR', col('created_at')), fn('MONTH', col('created_at'))],
+                raw: true,
+            })
+
+            const months: { year: number; month: number; count: number }[] = []
+
+            for (let i = 2; i >= 0; i--) {
+                const day = new Date(now.getFullYear(), now.getMonth() - i, 1)
+                months.push({
+                    year: day.getFullYear(),
+                    month: day.getMonth() + 1,
+                    count: 0,
+                })
+            }
+
+            rows.forEach((row: any) => {
+                const found = months.find(
+                    (month) => month.year === Number(row.year) && month.month === Number(row.month),
+                )
+                if (found) {
+                    found.count = Number(row.count)
+                }
+            })
+
+            return months
+        } catch (error: any) {
+            if (error instanceof AppError) {
+                throw error
+            }
+
+            throw new InternalServerError({ message: error.message + ' ' + error.stack })
+        }
+    }
 }
 
 export default new AnalyticService()
