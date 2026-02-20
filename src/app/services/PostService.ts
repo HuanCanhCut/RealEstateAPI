@@ -107,6 +107,7 @@ class PostService {
         per_page,
         role,
         category_id,
+        type,
         location,
         userId,
         approval_status,
@@ -117,6 +118,7 @@ class PostService {
         per_page: number
         role?: 'personal' | 'agent'
         category_id?: number
+        type?: 'sell' | 'rent'
         location?: string
         userId: number | null
         approval_status?: 'approved' | 'pending' | 'rejected' | 'all'
@@ -138,6 +140,10 @@ class PostService {
                 whereClause.administrative_address = {
                     [Op.like]: `%${location}%`,
                 }
+            }
+
+            if (type) {
+                whereClause.type = type
             }
 
             const currentUser = await User.findByPk(userId ?? 0)
@@ -477,7 +483,7 @@ class PostService {
         type: 'approved' | 'rejected' | 'pending'
     }) => {
         try {
-            const [post, user] = await Promise.all([Post.findByPk(postId), User.findByPk(userId)])
+            const [post, user] = await Promise.all([Post.unscoped().findByPk(postId), User.findByPk(userId)])
 
             if (!post) {
                 throw new NotFoundError({ message: 'Post not found' })
@@ -493,7 +499,7 @@ class PostService {
                 throw new BadRequestError({ message: 'Post already has this approval status' })
             }
 
-            await Post.update(
+            await Post.unscoped().update(
                 {
                     approval_status: type,
                 },
@@ -503,6 +509,8 @@ class PostService {
                     },
                 },
             )
+
+            post.set('approval_status', type)
 
             return post
         } catch (error: any) {

@@ -43,6 +43,7 @@ export const getPostsSchema = z.object({
         approval_status: z.enum(['approved', 'pending', 'rejected', 'all']).optional(),
         min_price: z.coerce.number().int().nonnegative().transform(String).optional(),
         max_price: z.coerce.number().int().nonnegative().transform(String).optional(),
+        type: z.enum(['sell', 'rent']).optional(),
     }),
 })
 

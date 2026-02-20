@@ -52,7 +52,8 @@ class PostController {
 
     getPosts = async (req: GetPostsRequest, res: Response, next: NextFunction) => {
         try {
-            const { page, per_page, role, category_id, location, approval_status, min_price, max_price } = req.query
+            const { page, per_page, role, category_id, type, location, approval_status, min_price, max_price } =
+                req.query
 
             const { access_token } = req.cookies
 
@@ -71,6 +72,7 @@ class PostController {
                 per_page: Number(per_page),
                 role,
                 category_id: category_id ? Number(category_id) : undefined,
+                type,
                 location,
                 userId: decoded?.sub ?? null,
                 approval_status,
